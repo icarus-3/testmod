@@ -28,6 +28,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import io.github.icarus3.RemoteControlItem;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(TestMod.MODID)
@@ -49,12 +50,21 @@ public class TestMod
     private static final RegistryObject<Item> myblockitem = ITEMS.register("myblock", () -> new BlockItem(myblock.get(), new Item.Properties()));
 
     // 注册一个仅为物品的方块(遥控器)
-    private static final RegistryObject<Item> handset = ITEMS.register("handset", () -> new Item(new Item.Properties()));
+    private static final RegistryObject<Item> handset = ITEMS.register("handset", () -> new RemoteControlItem(new Item.Properties()));
 
     public TestMod() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus(); // 定义 modEventBus
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         BLOCKS.register(bus);
         ITEMS.register(bus);
+
+        // 添加创造物品栏注册事件
+        modEventBus.addListener(this::addCreative);
     }
 
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(handset); // 添加遥控器
+        }
+    }
 }
